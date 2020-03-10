@@ -1,0 +1,62 @@
+{
+  "variables": {
+    "version": "1908",
+    "linx_user": "linxadmin",
+    "absolut_path": "/Users/elian/Google Drive/linx_deploy",
+    "aboslut_path_vm": "/users/elian/Downloads"
+  },
+
+  "builders": [
+    {
+      "vm_name": "{{ user `server_name` }}-{{ user `server_type` }}",
+      "iso_urls": [
+        "iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
+        "http://ftp.unicamp.br/pub/centos/7.7.{{ user `version` }}/isos/x86_64/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso"
+      ],
+      "iso_checksum_url": "file:{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}_sha256sum.txt",
+      "iso_checksum_type": "file",
+      "iso_target_path": "{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
+      "http_directory": "http",
+      "output_directory": "{{ user `absolut_path_vm` }}/{{ user `server_name` }}-{{ user `server_type` }}",
+      "boot_command": [
+        "<esc>",
+        "<wait>",        
+        "linux inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/linx_ks.cfg biosdevname=0 net.ifnames=0",
+        "<enter>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 5120,
+      "memory": 256,
+      "cpus": 1,
+      "disk_adapter_type": "sata",
+      "cdrom_adapter_type": "sata",
+      "tools_upload_flavor": "linux",
+      "guest_os_type": "centos7_64Guest",
+      "shutdown_command": "echo 'halt -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "type": "vmware-iso",
+      "ssh_username": "{{ user `linx_user` }}",
+      "ssh_private_key_file": "files/linx_key",
+      "ssh_port": 22,
+      "ssh_timeout": "60m",
+      "headless": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+        "LINXUSER={{ user `linx_user` }}"
+      ],
+      "scripts": [
+        "scripts/builder_tools.sh",
+        "scripts/clean.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "centos-7.7.{{ user `version` }}-x86_64-{{.Provider}}.box"
+    }
+  ]
+}

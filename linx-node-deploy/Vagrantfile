@@ -1,0 +1,28 @@
+servers=[
+  {
+    :hostname => "node-linx01",
+    :memoryram => 256,
+    :internal_ip => "10.0.50.10"
+  },
+  {
+    :hostname => "node-linx02",
+    :memoryram => 256,
+    :internal_ip => "10.0.50.11"
+  }
+]
+
+Vagrant.configure("2") do |config|
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = "linx-testing"
+      node.vm.hostname = machine[:hostname]
+      node.vm.network "private_network", ip: machine[:internal_ip], virtualbox__intnet: "intnet"
+      node.ssh.username = "linxadmin"
+      node.ssh.private_key_path = "../files/linx_key"
+      node.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--memory", machine[:memoryram]]
+      end
+    end
+  end
+end
