@@ -4,8 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory={{ ansible_user_dir }}/node_app
-ExecStart=/usr/bin/npm start
+Environment=NODE_PORT_APP={{ item.split("@")[1] }}
+WorkingDirectory={{ ansible_user }}/node_app
+ExecStart=/usr/bin/node app.js 
 StandardOutput=journal+console
 StandardError=inherit
 

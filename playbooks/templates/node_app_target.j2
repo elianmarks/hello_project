@@ -1,0 +1,7 @@
+[Unit]
+Description=Node App Target
+Requires={{ node_string_services }}
+After=network.target
+
+[Install]
+WantedBy=multi-user.target

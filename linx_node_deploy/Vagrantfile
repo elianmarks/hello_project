@@ -36,7 +36,7 @@ Vagrant.configure(2) do |config|
         v.vmx["numvcpus"] = machine[:cpunumber]
       end
       config.vm.provision "ansible" do |ansible|
-        ansible.verbose = "vvv"
+        ansible.verbose = "vv"
         ansible.playbook = "../playbooks/node_deployment.yaml"
         ansible.extra_vars = {
           server_type: "node",

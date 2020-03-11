@@ -35,7 +35,7 @@
         name: firewalld
         state: restarted
 
-    - name: add repository puppetlabs
+    - name: add repository node
       package:
         name: "{{ node_repo_rpm }}"
         state: present
@@ -47,21 +47,32 @@
     
     - name: create node_app directory
       file:
-        path: "{{ ansible_user_dir }}/node_app"
+        path: "/home/{{ ansible_user }}/node_app"
         state: directory
         mode: '0755'
     
     - name: copy app files
       copy:
         src: "files/{{ item }}"
-        dest: "{{ ansible_user_dir }}/node_app/{{ item }}"
+        dest: "/home/{{ ansible_user }}/node_app/{{ item }}"
+        mode: 0644
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
       with_items:
-        - "app.js"
         - "package.json"
+        
+    - name: create services in systemd
+      template:
+        src: templates/node_app.j2
+        dest: "/home/{{ ansible_user }}/node_app/app.js"
+        mode: 0644
+        owner: "root"
+        group: "root"
+      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x
     
     - name: Install npm packages 
       npm:
-        path: "{{ ansible_user_dir }}/node_app"
+        path: "/home/{{ ansible_user }}/node_app"
         
     - name: create services in systemd
       template:
@@ -70,10 +81,11 @@
         mode: 0644
         owner: "root"
         group: "root"
-      with_sequence: start=1 end="{{ ansible_processor_count | int }}" format=node_app@%1x 
+      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x
     
-    - set_fact: node_string_services="{{ node_string_services + ' ' + item }}"
-      with_sequence: start=1 end="{{ ansible_processor_count | int }}" format=node_app@%1x.service
+    - set_fact: 
+        node_string_services: "{{ node_string_services + ' ' + item }}"
+      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x.service
 
     - name: create target in systemd
       template:
@@ -89,5 +101,7 @@
         enabled: yes
         state: started
         daemon_reload: yes
+    
+    # - import_tasks: nginx.yaml
 
-    - import_tasks: puppet.yaml
+    # - import_tasks: puppet.yaml
