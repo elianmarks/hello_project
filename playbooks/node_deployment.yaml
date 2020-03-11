@@ -1,0 +1,93 @@
+---
+- name: Executing node playbook
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_method: sudo 
+
+  vars:
+    node_repo_rpm: "https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm"
+    node_string_services: ""
+
+  environment:
+    PATH: /usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin/
+  
+  tasks:
+    - name: add interface in internal zone, not working with module firewalld
+      command: "firewall-cmd --zone=internal --permanent --add-interface=eth1"
+
+    - name: active node port tcp
+      firewalld:
+        port: 3000/tcp
+        permanent: true
+        state: enabled
+        zone: internal
+    
+    - name: desactive ssh in public zone
+      firewalld:
+        zone: internal
+        service: ssh
+        permanent: true
+        state: enabled
+    
+    - name: restart firewalld
+      service:
+        name: firewalld
+        state: restarted
+
+    - name: add repository puppetlabs
+      package:
+        name: "{{ node_repo_rpm }}"
+        state: present
+
+    - name: install nodejs
+      package:
+        name: "nodejs"
+        state: present
+    
+    - name: create node_app directory
+      file:
+        path: "{{ ansible_user_dir }}/node_app"
+        state: directory
+        mode: '0755'
+    
+    - name: copy app files
+      copy:
+        src: "files/{{ item }}"
+        dest: "{{ ansible_user_dir }}/node_app/{{ item }}"
+      with_items:
+        - "app.js"
+        - "package.json"
+    
+    - name: Install npm packages 
+      npm:
+        path: "{{ ansible_user_dir }}/node_app"
+        
+    - name: create services in systemd
+      template:
+        src: templates/node_app_service.j2
+        dest: "/etc/systemd/system/{{ item }}.service"
+        mode: 0644
+        owner: "root"
+        group: "root"
+      with_sequence: start=1 end="{{ ansible_processor_count | int }}" format=node_app@%1x 
+    
+    - set_fact: node_string_services="{{ node_string_services + ' ' + item }}"
+      with_sequence: start=1 end="{{ ansible_processor_count | int }}" format=node_app@%1x.service
+
+    - name: create target in systemd
+      template:
+        src: templates/node_app_target.j2
+        dest: "/etc/systemd/system/node_app.target"
+        mode: 0644
+        owner: "root"
+        group: "root"
+    
+    - name: enable target node_app and start
+      systemd:
+        name: node_app.target
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    - import_tasks: puppet.yaml

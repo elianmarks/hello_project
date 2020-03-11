@@ -1,0 +1,13 @@
+[Unit]
+Description=Node App Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ ansible_user_dir }}/node_app
+ExecStart=/usr/bin/npm start
+StandardOutput=journal+console
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target

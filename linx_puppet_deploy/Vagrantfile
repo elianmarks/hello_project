@@ -1,0 +1,38 @@
+# define the servers
+servers=[
+  {
+    :hostname => "puppetserver-linx01",
+    :memoryram => 512,
+    :cpunumber => 1,
+    :internal_ip => "10.0.50.5"
+  }
+]
+
+# initialize vms and configure
+Vagrant.configure(2) do |config|
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = "linx-centos"
+      node.vm.hostname = machine[:hostname]
+      node.ssh.username = "linxadmin"
+      node.ssh.private_key_path = "../files/linx_key"
+      node.vm.network "private_network", ip: machine[:internal_ip]
+      node.vm.provider "virtualbox" do |v|
+        v.memory = machine[:memoryram]
+        v.cpus = machine[:cpunumber]
+      end
+      node.vm.provider "vmware_desktop" do |v|
+        v.vmx["memsize"] = machine[:memoryram]
+        v.vmx["numvcpus"] = machine[:cpunumber]
+      end
+      config.vm.provision "ansible" do |ansible|
+        ansible.verbose = "v"
+        ansible.playbook = "../playbooks/puppetserver_deployment.yaml"
+        ansible.extra_vars = {
+          server_type: "puppet"
+        }
+      end
+    end
+  end
+end

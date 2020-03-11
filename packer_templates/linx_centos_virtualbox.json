@@ -3,12 +3,12 @@
     "version": "1908",
     "linx_user": "linxadmin",
     "absolut_path": "/home/local/LATAM-EIG/elsilva/gdrive/linx_deploy",
-    "aboslut_path_vm": "/home/local/LATAM-EIG/elsilva/Downloads"
+    "absolut_path_vm": "/home/local/LATAM-EIG/elsilva/Downloads/"
   },
 
   "builders": [
     {
-      "vm_name": "{{ user `server_name` }}-{{ user `server_type` }}",
+      "vm_name": "linx-centos-{{ user `version` }}",
       "iso_urls": [
         "iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
         "http://ftp.unicamp.br/pub/centos/7.7.{{ user `version` }}/isos/x86_64/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso"
@@ -17,7 +17,7 @@
       "iso_checksum_type": "file",
       "iso_target_path": "{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
       "http_directory": "http",
-      "output_directory": "{{ user `absolut_path_vm` }}/{{ user `server_name` }}-{{ user `server_type` }}",
+      "output_directory": "{{ user `absolut_path_vm` }}/linx-centos-{{ user `version` }}",
       "boot_command": [
         "<esc>",
         "<wait>",        
@@ -25,8 +25,8 @@
         "<enter>"
       ],
       "boot_wait": "10s",
-      "disk_size": 5120,
-      "memory": 256,
+      "disk_size": 10240,
+      "memory": 512,
       "cpus": 1,
       "guest_os_type": "Linux_64",
       "shutdown_command": "echo 'halt -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
@@ -34,7 +34,7 @@
       "ssh_username": "{{ user `linx_user` }}",
       "ssh_private_key_file": "files/linx_key",
       "ssh_port": 22,
-      "ssh_timeout": "60m",
+      "ssh_timeout": "90m",
       "headless": true
     }
   ],
@@ -53,7 +53,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "centos-7.7.{{ user `version` }}-x86_64-{{.Provider}}.box"
+      "output": "boxes/centos-7.7.{{ user `version` }}-x86_64-{{.Provider}}.box"
     }
   ]
 }

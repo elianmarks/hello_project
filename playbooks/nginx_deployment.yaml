@@ -1,0 +1,15 @@
+---
+- name: Executing nginx playbook
+  hosts: all
+  gather_facts: false
+  become: yes
+  become_method: sudo
+
+  vars:
+
+  environment:
+    PATH: /usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin/
+  
+  tasks:
+
+  import_tasks: puppet.yaml

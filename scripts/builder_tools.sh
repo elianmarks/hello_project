@@ -30,7 +30,7 @@ elif [ "$PACKER_BUILDER_TYPE" == "virtualbox-iso" ]; then
   # mount and install guest additions
   sudo mkdir /mnt/virtualbox
   sudo mount -o loop,ro /home/$LINXUSER/VBoxGuestAdditions.iso /mnt/virtualbox
-  sudo /mnt/VBoxLinuxAdditions.run
+  sudo /mnt/virtualbox/./VBoxLinuxAdditions.run
   # clean files
   sudo umount /mnt/virtualbox
   sudo rm -rf /mnt/virtualbox

@@ -4,4 +4,4 @@ set -e
 set -x
 
 # clean files
-rm -f /home/$LINXUSER/shutdown.sh
+sudo rm -f /home/$LINXUSER/shutdown.sh
