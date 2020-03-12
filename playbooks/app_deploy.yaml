@@ -1,0 +1,47 @@
+---
+- name: Executing app deploy playbook
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_method: sudo 
+
+  vars:
+    git_repo: ""
+    app_path: ""/home/{{ ansible_user }}/node_app"
+
+  environment:
+    PATH: /usr/bin:/bin:/usr/sbin:/sbin
+  
+  tasks:    
+    - name: copy app files
+      copy:
+        src: "files/{{ item }}"
+        dest: "{{ app_path }}/{{ item }}"
+        mode: 0644
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      with_items:
+        - "package.json"
+        - "app.js"
+    
+    - name: get stat local package.json
+      local_action: stat path="files/package.json"
+      register: stat_local_packge_json
+    
+    - name: stat packge.json
+      stat:
+        path: "{{ app_path }}/package.json"
+      register: stat_package_json
+    
+    - name: Install npm packages 
+      npm:
+        path: "/home/{{ ansible_user }}/node_app"
+      when: stat_local_packge_json.stat.checksum != stat_package_json.stat.checksum
+    
+    - name: restart first node process
+      service:
+        name: node_app@3000
+        state: restarted
+    
+    
+    
