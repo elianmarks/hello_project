@@ -2,7 +2,7 @@
   "variables": {
     "version": "1908",
     "helloproject_user": "helloproject",
-    "absolut_path": "/home/local/LATAM-EIG/elsilva/gdrive/helloproject_deploy",
+    "absolut_path": "/home/local/LATAM-EIG/elsilva/gdrive/linx_deploy",
     "absolut_path_vm": "/home/local/LATAM-EIG/elsilva/Downloads/"
   },
 
