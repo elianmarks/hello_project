@@ -13,7 +13,6 @@
     * [Kickstart](#kickstart)
 * [Vagrant deploy](#vagrantdeploy)
     * [Node](#nodevm)
-    * [Puppet server](#puppetservervm)
 * [Ansible playbooks](#ansibleplaybooks)
 * [Application deploy](#applicationdeploy)
     * [Deploy diagram](#deploydiagram)
@@ -70,21 +69,16 @@ yum remove unzip -y
 │   └── CentOS-7-x86_64-Minimal-1908_sha256sum.txt  # File with checksum CentOS version 1908
 ├── hello_project_node/                             # Node VM data
 │   └── Vagrantfile                                 # Vagrantfile to Node VM
-├── hello_project_puppet/                           # Puppet VM data
-│   └── Vagrantfile                                 # Vagrantfile to Puppet Server VM
 ├── packer_templates/                               # Packer templates
 │   └── helloproject_centos_virtualbox.json         # JSON file to builder VirtualBox
 │   └── helloproject_centos_vmware.json             # JSON file to builder VMware
 ├── playbooks/                                      # Playbooks
 │   └── files/                                      # Files to playbooks
-│       └── puppet_agent.conf                       # File configuration for Puppet agent
 │   └── templates/                                  # Templates to playbooks
 │       └── node_app_service.j2                     # Jinja file to Node systemd service
 │       └── node_app_target.j2                      # Jinja file to Node systemd target
 │   └── nginx.yaml                                  # Nginx deploy
 │   └── node_deploy.yaml                            # Node deploy
-│   └── puppet.yaml                                 # Puppet install
-│   └── puppetserver_deploy.yaml                    # Pupper server deploy
 ├── scripts/                                        # Scan files
 │   └── builder_tools.sh                            # Install VMwareTools or VBoxGuestAdditions
 │   └── clean.sh                                    # Clean files after Packer deploy
@@ -112,12 +106,6 @@ yum remove unzip -y
 
 
 #### Node [[Back to contents]](#table_of_contents) <a name="nodevm"></a>
-
-
-#### Puppet server [[Back to contents]](#table_of_contents) <a name="puppetservervm"></a>
-
-
-## Ansible Playbooks Tests [[Back to contents]](#table_of_contents) <a name="ansibleplaybooks"></a>
 
 
 ## Application deploy [[Back to contents]](#table_of_contents) <a name="applicationdeploy"></a>

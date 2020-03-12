@@ -1,1 +1,47 @@
 ---
+- name: install nginx
+  package:
+    name: "nginx"
+    state: present
+
+- set_fact: 
+    nodes: "{{ nodes | default([]) | union([item]) }}"
+  with_sequence: start=0 end="{{ ansible_processor_vcpus | int - 1 }}" format=127.0.0.1:300%1x
+
+- name: copy nginx conf
+  copy:
+    src: "files/nginx.conf"
+    dest: "/etc/nginx/nginx.conf"
+    mode: 0644
+    owner: "root"
+    group: "root"
+
+- name: create services in systemd
+  template:
+    src: templates/node_proxy_nginx.j2
+    dest: "/etc/nginx/conf.d/node.conf"
+    mode: 0644
+    owner: "root"
+    group: "root"
+
+- name: create ssl directory
+  file:
+    path: /etc/nginx/conf/ssl
+    state: directory
+
+- name: copy nginx conf
+  copy:
+    src: "files/{{ item }}"
+    dest: "/etc/nginx/ssl/{{ item }}"
+    mode: 0600
+    owner: "root"
+    group: "root"
+  with_items:
+    - "helloproject.crt"
+    - "helloproject.key"
+  
+- name: enable nginx service
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started

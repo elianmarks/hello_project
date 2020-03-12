@@ -1,21 +1,12 @@
 # define the servers
 servers=[
   {
-    :hostname => "node-linx01",
-    :memoryram => 256,
-    :cpunumber => 1,
+    :hostname => "node-app",
+    :memoryram => 512,
+    :cpunumber => 2,
     :internal_ip => "10.0.50.10"
   },
-  {
-    :hostname => "node-linx02",
-    :memoryram => 256,
-    :cpunumber => 2,
-    :internal_ip => "10.0.50.11"
-  }
 ]
-
-# define puppet ip
-puppet_server = "10.0.50.5"
 
 # initialize vms and configure
 Vagrant.configure(2) do |config|

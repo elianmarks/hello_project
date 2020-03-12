@@ -8,7 +8,6 @@
   vars:
     node_repo_rpm: "https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm"
     node_string_services: ""
-    nginx_repo_rpm: ""
 
   environment:
     PATH: /usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin/
@@ -71,11 +70,11 @@
         mode: 0644
         owner: "root"
         group: "root"
-      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x
+      with_sequence: start=0 end="{{ ansible_processor_vcpus | int - 1 }}" format=node_app@300%1x
     
     - set_fact: 
         node_string_services: "{{ node_string_services + ' ' + item }}"
-      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x.service
+      with_sequence: start=0 end="{{ ansible_processor_vcpus | int - 1 }}" format=node_app@300%1x.service
 
     - name: create target in systemd
       template:
@@ -92,6 +91,5 @@
         state: started
         daemon_reload: yes
     
-    # - import_tasks: nginx.yaml
-
-    # - import_tasks: puppet.yaml
+    - import_tasks: nginx.yaml
+    

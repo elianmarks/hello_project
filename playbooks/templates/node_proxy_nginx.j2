@@ -1,0 +1,27 @@
+upstream helloproject.com {
+    ip_hash;
+    {% for node in nodes %}
+    server {{ node }};
+    {% endfor %}
+}
+
+server {
+    listen 80;
+    server_name helloproject.com www.helloproject.com;
+    return 301 https://helloproject.com$request_uri;
+}
+
+server {
+    server_name helloproject.com www.helloproject.com;
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/ssl/helloproject.crt;
+    ssl_certificate_key /etc/nginx/ssl/helloproject.key;
+
+    location / {
+        proxy_pass http://helloproject.com;
+        client_max_body_size 20M;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $http_host;
+    }
+}
