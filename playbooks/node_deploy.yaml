@@ -8,28 +8,26 @@
   vars:
     node_repo_rpm: "https://rpm.nodesource.com/pub_12.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm"
     node_string_services: ""
+    nginx_repo_rpm: ""
 
   environment:
     PATH: /usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin/
   
   tasks:
-    - name: add interface in internal zone, not working with module firewalld
-      command: "firewall-cmd --zone=internal --permanent --add-interface=eth1"
+    - name: desactive http in public zone
+      firewalld:
+        zone: public
+        service: http
+        permanent: true
+        state: enabled
 
-    - name: active node port tcp
+    - name: active https in public zone
       firewalld:
-        port: 3000/tcp
+        zone: public
+        service: https
         permanent: true
         state: enabled
-        zone: internal
-    
-    - name: desactive ssh in public zone
-      firewalld:
-        zone: internal
-        service: ssh
-        permanent: true
-        state: enabled
-    
+        
     - name: restart firewalld
       service:
         name: firewalld
@@ -60,15 +58,7 @@
         group: "{{ ansible_user }}"
       with_items:
         - "package.json"
-        
-    - name: create services in systemd
-      template:
-        src: templates/node_app.j2
-        dest: "/home/{{ ansible_user }}/node_app/app.js"
-        mode: 0644
-        owner: "root"
-        group: "root"
-      with_sequence: start=0 end="{{ ansible_processor_count | int }}" format=node_app@300%1x
+        - "app.js"
     
     - name: Install npm packages 
       npm:

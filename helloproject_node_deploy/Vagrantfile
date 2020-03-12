@@ -1,22 +1,31 @@
 # define the servers
 servers=[
   {
-    :hostname => "puppetserver-linx01",
-    :memoryram => 512,
+    :hostname => "node-linx01",
+    :memoryram => 256,
     :cpunumber => 1,
-    :internal_ip => "10.0.50.5"
+    :internal_ip => "10.0.50.10"
+  },
+  {
+    :hostname => "node-linx02",
+    :memoryram => 256,
+    :cpunumber => 2,
+    :internal_ip => "10.0.50.11"
   }
 ]
+
+# define puppet ip
+puppet_server = "10.0.50.5"
 
 # initialize vms and configure
 Vagrant.configure(2) do |config|
   config.vm.synced_folder '.', '/vagrant', disabled: true
   servers.each do |machine|
     config.vm.define machine[:hostname] do |node|
-      node.vm.box = "linx-centos"
+      node.vm.box = "helloproject-centos"
       node.vm.hostname = machine[:hostname]
       node.ssh.username = "linxadmin"
-      node.ssh.private_key_path = "../files/linx_key"
+      node.ssh.private_key_path = "../files/helloproject_key"
       node.vm.network "private_network", ip: machine[:internal_ip]
       node.vm.provider "virtualbox" do |v|
         v.memory = machine[:memoryram]
@@ -27,10 +36,11 @@ Vagrant.configure(2) do |config|
         v.vmx["numvcpus"] = machine[:cpunumber]
       end
       config.vm.provision "ansible" do |ansible|
-        ansible.verbose = "v"
-        ansible.playbook = "../playbooks/puppetserver_deployment.yaml"
+        ansible.verbose = "vv"
+        ansible.playbook = "../playbooks/node_deploy.yaml"
         ansible.extra_vars = {
-          server_type: "puppet"
+          server_type: "node",
+          puppet_server: puppet_server
         }
       end
     end

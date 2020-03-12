@@ -1,14 +1,14 @@
 {
   "variables": {
     "version": "1908",
-    "linx_user": "linxadmin",
-    "absolut_path": "/Users/elian/Google Drive/linx_deploy",
+    "helloproject_user": "helloprojectadmin",
+    "absolut_path": "/Users/elian/Google Drive/helloproject_deploy",
     "absolut_path_vm": "/Users/elian/Downloads"
   },
 
   "builders": [
     {
-      "vm_name": "linx-centos-{{ user `version` }}",
+      "vm_name": "helloproject-centos-{{ user `version` }}",
       "iso_urls": [
         "iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
         "http://ftp.unicamp.br/pub/centos/7.7.{{ user `version` }}/isos/x86_64/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso"
@@ -17,11 +17,11 @@
       "iso_checksum_type": "file",
       "iso_target_path": "{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
       "http_directory": "http",
-      "output_directory": "{{ user `absolut_path_vm` }}/linx-centos-{{ user `version` }}",
+      "output_directory": "{{ user `absolut_path_vm` }}/helloproject-centos-{{ user `version` }}",
       "boot_command": [
         "<esc>",
         "<wait>",        
-        "linux inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/linx_ks.cfg biosdevname=0 net.ifnames=0",
+        "linux inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/helloproject_ks.cfg biosdevname=0 net.ifnames=0",
         "<enter>"
       ],
       "boot_wait": "10s",
@@ -34,8 +34,8 @@
       "guest_os_type": "centos7_64Guest",
       "shutdown_command": "echo 'halt -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
       "type": "vmware-iso",
-      "ssh_username": "{{ user `linx_user` }}",
-      "ssh_private_key_file": "files/linx_key",
+      "ssh_username": "{{ user `helloproject_user` }}",
+      "ssh_private_key_file": "files/helloproject_key",
       "ssh_port": 22,
       "ssh_timeout": "90m",
       "headless": true
@@ -45,7 +45,7 @@
     {
       "type": "shell",
       "environment_vars": [
-        "LINXUSER={{ user `linx_user` }}"
+        "HELLOPROJECTUSER={{ user `helloproject_user` }}"
       ],
       "scripts": [
         "scripts/builder_tools.sh",
