@@ -10,7 +10,7 @@
     node_string_services: ""
 
   environment:
-    PATH: /usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin/
+    PATH: /usr/bin:/bin:/usr/sbin:/sbin
   
   tasks:
     - name: desactive http in public zone

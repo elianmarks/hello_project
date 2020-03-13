@@ -1,23 +1,21 @@
 {
   "variables": {
     "version": "1908",
-    "helloproject_user": "helloproject",
-    "absolut_path": "/home/local/LATAM-EIG/elsilva/gdrive/helloproject_deploy",
-    "absolut_path_vm": "/home/local/LATAM-EIG/elsilva/Downloads/"
+    "helloproject_user": "helloproject"
   },
 
   "builders": [
     {
       "vm_name": "helloproject-centos-{{ user `version` }}",
       "iso_urls": [
-        "iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
+        "{{ pwd }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
         "http://ftp.unicamp.br/pub/centos/7.7.{{ user `version` }}/isos/x86_64/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso"
       ],
-      "iso_checksum_url": "file:{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}_sha256sum.txt",
+      "iso_checksum_url": "file:{{ pwd }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}_sha256sum.txt",
       "iso_checksum_type": "file",
-      "iso_target_path": "{{ user `absolut_path` }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
+      "iso_target_path": "{{ pwd }}/iso/CentOS-7-x86_64-Minimal-{{ user `version` }}.iso",
       "http_directory": "http",
-      "output_directory": "{{ user `absolut_path_vm` }}/helloproject-centos-{{ user `version` }}",
+      "output_directory": "{{ pwd }}/helloproject-centos-{{ user `version` }}",
       "boot_command": [
         "<esc>",
         "<wait>",        
@@ -32,7 +30,7 @@
       "shutdown_command": "echo 'halt -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
       "type": "virtualbox-iso",
       "ssh_username": "{{ user `helloproject_user` }}",
-      "ssh_private_key_file": "files/helloproject_key",
+      "ssh_private_key_file": "{{ pwd }}/files/helloproject_key",
       "ssh_port": 22,
       "ssh_timeout": "90m",
       "headless": true
@@ -45,15 +43,15 @@
         "HELLOPROJECTUSER={{ user `helloproject_user` }}"
       ],
       "scripts": [
-        "scripts/builder_tools.sh",
-        "scripts/clean.sh"
+        "{{ pwd }}/scripts/builder_tools.sh",
+        "{{ pwd }}/scripts/clean.sh"
       ]
     }
   ],
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "boxes/centos-7.7.{{ user `version` }}-x86_64-{{.Provider}}.box"
+      "output": "{{ pwd }}/boxes/centos-7.7.{{ user `version` }}-x86_64-{{.Provider}}.box"
     }
   ]
 }

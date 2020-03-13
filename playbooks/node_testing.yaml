@@ -1,0 +1,20 @@
+- name: restart first node process
+  service:
+    name: node_app@3000
+    state: restarted
+
+- name: wait start port
+  wait_for:
+    port: 3000
+    state: started
+    timeout: 30
+    delay: 5
+  register: result_wait
+
+- name: check start test app
+  uri:
+    url: "http://localhost:3000"
+    return_content: yes
+  register: result_check_start
+  until: result_check_start.status == 200 and result_check_start.content | regex_search("hello world", ignorecase=True) != None
+  retries: 3

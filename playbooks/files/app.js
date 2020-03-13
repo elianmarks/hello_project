@@ -6,5 +6,5 @@ app.get('/', function (req, res) {
 });
 
 app.listen(process.env.NODE_PORT_APP, function () {
-    console.log('Example app listening on port' + process.env.NODE_PORT_APP);
+    console.log('Example app listening on port ' + process.env.NODE_PORT_APP);
 });
