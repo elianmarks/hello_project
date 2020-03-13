@@ -4,3 +4,4 @@ boxes/*.box
 iso/CentOS-7-x86_64-Minimal-1908.iso*
 .vagrant
 */.vagrant
+*/__pycache__

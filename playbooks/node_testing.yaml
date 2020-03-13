@@ -1,6 +1,6 @@
 - name: restart first node process
   service:
-    name: node_app@3000
+    name: "{{ app_name }}@3000"
     state: restarted
 
 - name: wait start port

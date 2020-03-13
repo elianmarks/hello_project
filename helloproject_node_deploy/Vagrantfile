@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
     config.vm.define machine[:hostname] do |node|
       node.vm.box = "helloproject-centos"
       node.vm.hostname = machine[:hostname]
-      node.ssh.username = "linxadmin"
+      node.ssh.username = "helloproject"
       node.ssh.private_key_path = "../files/helloproject_key"
       node.vm.network "private_network", ip: machine[:internal_ip]
       node.vm.provider "virtualbox" do |v|

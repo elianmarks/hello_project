@@ -32,7 +32,7 @@
 - name: copy nginx conf
   copy:
     src: "files/{{ item }}"
-    dest: "/etc/nginx/ssl/{{ item }}"
+    dest: "/etc/nginx/conf/ssl/{{ item }}"
     mode: 0600
     owner: "root"
     group: "root"

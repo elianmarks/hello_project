@@ -6,79 +6,74 @@
   become_method: sudo 
 
   vars:
-    git_repo: ""
-    app_path: "/home/{{ ansible_user }}/node_app"
+    app_path: "/home/{{ ansible_user }}/{{ app_name }}"
     old_release_path: "/home/{{ ansible_user }}/old_release"
 
   environment:
     PATH: /usr/bin:/bin:/usr/sbin:/sbin
   
   tasks:
-    block:
-      - name: create old_realse directory if not exists
-        file:
-          dest: "{{ release_path }}"
-          mode: 0755
-          owner: "{{ ansible_user }}"
-          group: "{{ ansible_user }}"
-          state: directory
-      
-      - name: copy current release to old_release
-        copy: 
-          remote_src: true
-          src: "{{ app_path }}/{{ item }}"
-          dest: "{{ old_release_path }}/{{ item }}"
-        with_items:
-          - "package.json"
-          - "app.js"
+    - name: app deploy
+      block:
+        - name: create old_realse directory if not exists
+          file:
+            dest: "{{ release_path }}"
+            mode: 0755
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            state: directory
+        
+        - name: copy current release to old_release
+          copy: 
+            remote_src: true
+            src: "{{ app_path }}/{{ item }}"
+            dest: "{{ old_release_path }}/{{ item }}"
+          with_items:
+            - "package.json"
+            - "app.js"
 
-      - name: copy app files
-        copy:
-          src: "files/{{ item }}"
-          dest: "{{ app_path }}/{{ item }}"
-          mode: 0644
-          owner: "{{ ansible_user }}"
-          group: "{{ ansible_user }}"
-        with_items:
-          - "package.json"
-          - "app.js"
-      
-      - name: get stat local package.json
-        local_action: stat path="files/package.json"
-        register: stat_local_packge_json
-      
-      - name: stat packge.json
-        stat:
-          path: "{{ app_path }}/package.json"
-        register: stat_package_json
-      
-      - name: Install npm packages 
-        npm:
-          path: "/home/{{ ansible_user }}/node_app"
-        when: stat_local_packge_json.stat.checksum != stat_package_json.stat.checksum
-      
-      - import_tasks: node_testing.yaml
+        - name: copy app files
+          copy:
+            src: "files/{{ item }}"
+            dest: "{{ app_path }}/{{ item }}"
+            mode: 0644
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+          with_items:
+            - "package.json"
+            - "app.js"
+        
+        - name: get stat local package.json
+          local_action: stat path="files/package.json"
+          register: stat_local_packge_json
+        
+        - name: stat packge.json
+          stat:
+            path: "{{ app_path }}/package.json"
+          register: stat_package_json
+        
+        - name: Install npm packages 
+          npm:
+            path: "/home/{{ ansible_user }}/{{ app_name }}"
+          when: stat_local_packge_json.stat.checksum != stat_package_json.stat.checksum
+        
+        - import_tasks: node_testing.yaml
 
-      - name: restart others services
-        service:
-          name: "{{ item }}"
-        with_sequence: start=1 end="{{ ansible_processor_vcpus | int - 1 }}" format=node_app@300%1x
-        when: ansible_processor_vcpus > 0
+        - name: restart others services
+          service:
+            name: "{{ item }}"
+          with_sequence: start=1 end="{{ ansible_processor_vcpus | int - 1 }}" format="{{ app_name }}@300%1x"
+          when: ansible_processor_vcpus > 0
 
-    rescue:      
-      - name: copy old release to production
-        copy: 
-          remote_src: true
-          src: "{{ old_release_path }}/{{ item }}"
-          dest: "{{ app_path }}/{{ item }}"
-        with_items:
-          - "package.json"
-          - "app.js"
-        when: (result_wait is defined and result_wait.failed) or (result_check_start is defined and result_check_start.failed)
-      
-      - import_tasks: node_testing.yaml
-
-    
-    
-    
-    
+      rescue:      
+        - name: copy old release to production
+          copy: 
+            remote_src: true
+            src: "{{ old_release_path }}/{{ item }}"
+            dest: "{{ app_path }}/{{ item }}"
+          with_items:
+            - "package.json"
+            - "app.js"
+          when: (result_wait is defined and result_wait.failed) or (result_check_start is defined and result_check_start.failed)
+        
+        - import_tasks: node_testing.yaml
