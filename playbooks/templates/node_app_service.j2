@@ -9,6 +9,7 @@ WorkingDirectory=/home/{{ ansible_user }}/node_app
 ExecStart=/usr/bin/node app.js 
 StandardOutput=journal+console
 StandardError=inherit
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

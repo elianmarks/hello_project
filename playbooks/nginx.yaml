@@ -39,9 +39,17 @@
   with_items:
     - "helloproject.crt"
     - "helloproject.key"
+
+- name: add always restart in nginx service
+  lineinfile:
+    path: /usr/lib/systemd/systemd/nginx.service
+    state: present
+    line: "Restart=always"
+    insertafter: "^[Service]"
   
 - name: enable nginx service
   systemd:
     name: nginx
     enabled: yes
     state: started
+    daemon_reload: yes

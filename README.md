@@ -13,6 +13,7 @@
 * [Ansible playbooks](#ansibleplaybooks)
 * [Application deploy](#applicationdeploy)
 * [Load test](#loadtest)
+* [Processes](#processes)
 
 
 ## What you need [[Back to contents]](#table_of_contents) <a name="prerequisites"></a>
@@ -197,3 +198,6 @@ optional arguments:
 
 ```python scripts/load_test.py -a helloproject.com -i 10.0.50.10 -t 50 -r 500 --load```
 
+
+## Load test [[Back to contents]](#table_of_contents) <a name="loadtest"></a>
+Systemd is responsible for monitoring the NodeJS and Nginx application processes, ensuring that if they stop, the start is performed again. The option Restart=always has been added to the services.
