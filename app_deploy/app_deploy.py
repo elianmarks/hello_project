@@ -28,7 +28,7 @@ def app_deploy():
     if request.headers.get("Key-Deploy") is not None and \
         request.headers.get("Application-Deploy") is not None and \
         request.headers.get("Server-Deploy") is not None and \
-        request.headers.get("Key-Deploy") == os.environ.get("KEYDEPLOY"):
+        request.headers.get("Key-Deploy") == "key_security":
         module_ansible = ModuleAnsible(module_log.log)
         flag_rollback = os.environ.get("PWD") + "flags/rollback"
         if os.path.exists(flag_rollback):

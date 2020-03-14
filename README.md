@@ -14,6 +14,7 @@
 * [Application deploy](#applicationdeploy)
 * [Load test](#loadtest)
 * [Processes](#processes)
+* [Log parse](#logparse)
 
 
 ## What you need [[Back to contents]](#table_of_contents) <a name="prerequisites"></a>
@@ -152,20 +153,17 @@ Template for /etc/nginx/conf.d/node.conf, this has the reverse proxy settings.
 ## Application deploy [[Back to contents]](#table_of_contents) <a name="applicationdeploy"></a>
 This will be responsible for receiving the request for the deployment request and executing the playbook.
 
-#### Define environment variable KEYDEPLOY
-- export KEYDEPLOY="key_security"
-
 #### Start application
-- python app_deploy/app_deploy.py &
+- screen -S "app_deploy" -dm python3.7 app_deploy/app_deploy.py
 
 #### Request headers
-- Key-Deploy - Get this value in environment variable (KEYDEPLOY) and compare with value of the header.
+- Key-Deploy - Security key for authorization deploy.
 - Application-Deploy - Name of the application to deploy.
 - Server-Deploy - IP of the server to execute playbook.
 
-#### Example request
+#### Example request (Simulation of a webhook)
 ```
-curl -I -X POST http://127.0.0.1:5000/app_deploy \
+curl -i -X POST http://127.0.0.1:5000/app_deploy \
     -H "Key-Deploy: key_security" \
     -H "Application-Deploy: node_app" \
     -H "Server-Deploy: 10.0.50.10"
@@ -192,12 +190,20 @@ optional arguments:
 
 #### Example to generate random access
 
-```python scripts/load_test.py -a helloproject.com -i 10.0.50.10 --random```
+```python3.7 scripts/load_test.py -a helloproject.com -i 10.0.50.10 --random```
 
 #### Example to load test
 
-```python scripts/load_test.py -a helloproject.com -i 10.0.50.10 -t 50 -r 500 --load```
+```python3.7 scripts/load_test.py -a helloproject.com -i 10.0.50.10 -t 50 -r 500 --load```
 
 
 ## Load test [[Back to contents]](#table_of_contents) <a name="loadtest"></a>
 Systemd is responsible for monitoring the NodeJS and Nginx application processes, ensuring that if they stop, the start is performed again. The option Restart=always has been added to the services.
+
+## Log parse [[Back to contents]](#table_of_contents) <a name="logparse"></a>
+The entry below was created in the contrab to run the log report.
+
+```
+#Ansible: execute log_parse.sh
+0 22 * * * /usr/bin/log_parse.sh
+```

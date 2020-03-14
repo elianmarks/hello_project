@@ -15,13 +15,18 @@
   tasks:
     - name: app deploy
       block:
-        - name: create old_realse directory if not exists
+        - name: create old_release directory if not exists
           file:
-            dest: "{{ release_path }}"
+            dest: "{{ old_release_path }}"
             mode: 0755
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
             state: directory
+        
+        - name: stat package.json
+          stat:
+            path: "{{ app_path }}/package.json"
+          register: stat_local_package_json
         
         - name: copy current release to old_release
           copy: 
@@ -43,10 +48,6 @@
             - "package.json"
             - "app.js"
         
-        - name: get stat local package.json
-          local_action: stat path="files/package.json"
-          register: stat_local_packge_json
-        
         - name: stat package.json
           stat:
             path: "{{ app_path }}/package.json"
@@ -55,7 +56,7 @@
         - name: Install npm packages 
           npm:
             path: "/home/{{ ansible_user }}/{{ app_name }}"
-          when: stat_local_packge_json.stat.checksum != stat_package_json.stat.checksum
+          when: stat_local_package_json.stat.checksum != stat_package_json.stat.checksum
         
         - import_tasks: node_testing.yaml
 

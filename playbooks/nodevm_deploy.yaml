@@ -44,6 +44,7 @@
       with_items:
         - "nodejs"
         - "ntp"
+        - "mailx"
     
     - name: set timezone
       timezone:
@@ -51,7 +52,7 @@
     
     - name: start ntp daemon
       service:
-        name: "{{ ntp_daemon }}"
+        name: "ntpd"
         state: started
         enabled: true
     

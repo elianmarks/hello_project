@@ -25,7 +25,7 @@ class ModuleAnsible(object):
         try:
             self._log = module_log
             self.working_dir = os.environ.get("PWD")
-            private_key_path = self.working_dir + "files/helloproject_key"
+            private_key_path = self.working_dir + "/files/helloproject_key"
             context.CLIARGS = ImmutableDict(connection='ssh', remote_user=user_ansible, forks=10,
                                             private_key_file=private_key_path, verbosity=verbosity, check=False, diff=False, host_key_checking=False,
                                             timeout=30, log_path=None, connect_timeout=30, connect_retries=30, connect_interval=30, become_method=None,
@@ -33,7 +33,7 @@ class ModuleAnsible(object):
                                             ask_vault_pass=None, vault_password_files=None, new_vault_password_file=None, output_file=None,
                                             one_line=None, tree=None, ask_sudo_pass=None, ask_su_pass=None, sudo=None, sudo_user=None,
                                             become=None, become_ask_pass=None, ask_pass=None, ssh_common_args=None, sftp_extra_args=None,
-                                            scp_extra_args=None, ssh_extra_args=None, poll_interval=None, seconds=None, syntax=None, force_handlers=None,
+                                            scp_extra_args=None, ssh_extra_args="-o StrictHostKeyChecking=no", poll_interval=None, seconds=None, syntax=None, force_handlers=None,
                                             flush_cache=None, listtasks=None, listtags=None)
             self._passwords = {}
             self._loader = DataLoader()
