@@ -6,16 +6,13 @@
 * [What you need](#prerequisites)
 * [Installation of dependencies](#installationdependencies)
 * [Directory structure](#structure)
-* [Work diagram](#workdiagram)
 * [Packer deploy](#packerdeploy)
-    * [Builders](#packerbuilders)
-    * [Templates](#packertemplates)
     * [Kickstart](#kickstart)
 * [Vagrant deploy](#vagrantdeploy)
-    * [Node](#nodevm)
+    * [Node VM](#nodevm)
 * [Ansible playbooks](#ansibleplaybooks)
 * [Application deploy](#applicationdeploy)
-    * [Deploy diagram](#deploydiagram)
+* [Load test](#loadtest)
 
 
 ## What you need [[Back to contents]](#table_of_contents) <a name="prerequisites"></a>
@@ -27,7 +24,7 @@
 
 ## Installation [[Back to contents]](#table_of_contents) <a name="installationdependencies"></a>
 ```
-# Installation process of VirtualBox or VMware will not be described
+# Installation process of VirtualBox will not be described
 
 # Install EPEL
 sudo yum install epel-release -y
@@ -59,6 +56,11 @@ yum remove unzip -y
 ## Directory structure [[Back to contents]](#table_of_contents) <a name="structure"></a>
 ```
 ./
+├── app_deploy/                                     # Python application
+│   └── app_deploy.py                               # Main python
+│   └── module_ansible.py                           # Ansible module
+│   └── module_log.py                               # Log module
+│   └── requirements.txt                            # Dependencies
 ├── boxes/                                          # Boxes generated with Packer
 ├── files/                                          # Additional files
 │   └── helloproject_key                            # Private key for SSH
@@ -74,41 +76,124 @@ yum remove unzip -y
 │   └── helloproject_centos_vmware.json             # JSON file to builder VMware
 ├── playbooks/                                      # Playbooks
 │   └── files/                                      # Files to playbooks
+│       └── app.js                                  # NodeJS application
+│       └── helloproject.crt                        # Certificate to Nginx
+│       └── helloproject.key                        # Private key to Nginx
+│       └── nginx.conf                              # Nginx file conf
+│       └── package.json                            # Package file to NodeJS application
+│       └── log_parse.sh                            # Script to parse the access log
 │   └── templates/                                  # Templates to playbooks
 │       └── node_app_service.j2                     # Jinja file to Node systemd service
 │       └── node_app_target.j2                      # Jinja file to Node systemd target
+│       └── node_proxy_nginx.j2                     # Jinja file to proxy reverse conf
+│   └── app_deploy.yaml                             # App deploy
 │   └── nginx.yaml                                  # Nginx deploy
 │   └── node_deploy.yaml                            # Node deploy
+│   └── node_testing.yaml                           # Testing Node application
 ├── scripts/                                        # Scan files
 │   └── builder_tools.sh                            # Install VMwareTools or VBoxGuestAdditions
 │   └── clean.sh                                    # Clean files after Packer deploy
+│   └── load_test.py                                # Load test script
 ├── deploy.sh                                       # Deploy all tasks
 ```
 
 
-## Working diagram [[Back to contents]](#table_of_contents) <a name="workdiagram"></a>
-
-![alt text](https://github.com/elianmarks/ "Working diagram")
-
 ## Packer deploy [[Back to contents]](#table_of_contents) <a name="packerdeploy"></a>
-
-
-#### Builders [[Back to contents]](#table_of_contents) <a name="packerbuilders"></a>
-
-
-#### Templates [[Back to contents]](#table_of_contents) <a name="packertemplates"></a>
-
+Responsible for creating the virtual machine, installing it using Kickstart and generating the box for Vangrat.
 
 #### Kickstart [[Back to contents]](#table_of_contents) <a name="kickstart"></a>
+Responsible for setting the machine installation settings, creating the user and the settings for SSH access.
 
+#### User
+- helloproject
+
+#### Password
+- helloproject
+
+#### Root password
+- helloproject
 
 ## Vagrant deploy [[Back to contents]](#table_of_contents) <a name="vagrantdeploy"></a>
+Responsible for deploying the virtual machine and calling the playbook nodevm_deploy.yaml for configuration.
 
+#### Node VM [[Back to contents]](#table_of_contents) <a name="nodevm"></a>
+Machine responsible for running Nginx and the NodeJS application.
 
-#### Node [[Back to contents]](#table_of_contents) <a name="nodevm"></a>
+#### Path NodeJS application
+- /home/helloproject/node_app
+
+## Ansible playbooks [[Back to contents]](#table_of_contents) <a name="ansibleplaybooks"></a>
+
+#### app_deploy.yaml
+Responsible for deploying the application and importing the test task, perform the rollback if necessary as well.
+
+#### nodevm_deploy.yaml
+Responsible for making the settings on the virtual machine.
+
+#### node_testing.yaml
+Responsible for performing tests on the application after deploy.
+
+#### nginx.yaml
+Responsible for configuring Nginx.
+
+### Jinja Templates
+
+#### node_app_service.j2
+Template for /etc/systemd/systemd/node_app@XXXX.service, this is responsible for starting the NodeJS application.
+
+#### node_app_target.j2
+Template for /etc/systemd/system/node_app.target, this is responsible for managing node_app services.
+
+#### node_proxy_nginx.j2
+Template for /etc/nginx/conf.d/node.conf, this has the reverse proxy settings. 
 
 
 ## Application deploy [[Back to contents]](#table_of_contents) <a name="applicationdeploy"></a>
+This will be responsible for receiving the request for the deployment request and executing the playbook.
+
+#### Define environment variable KEYDEPLOY
+- export KEYDEPLOY="key_security"
+
+#### Start application
+- python app_deploy/app_deploy.py &
+
+#### Request headers
+- Key-Deploy - Get this value in environment variable (KEYDEPLOY) and compare with value of the header.
+- Application-Deploy - Name of the application to deploy.
+- Server-Deploy - IP of the server to execute playbook.
+
+#### Example request
+```
+curl -I -X POST http://127.0.0.1:5000/app_deploy \
+    -H "Key-Deploy: key_security" \
+    -H "Application-Deploy: node_app" \
+    -H "Server-Deploy: 10.0.50.10"
+```
 
 
-#### Deploy diagram [[Back to contents]](#table_of_contents) <a name="deploydiagram"></a>
+## Load test [[Back to contents]](#table_of_contents) <a name="loadtest"></a>
+This is responsible for carrying out the load test and creating calls for random url.
+
+
+```
+usage: load_test.py [-h] [-t NUMBER_THREADS] [-r NUMBER_REQUESTS] -a APP_HOST
+                    -i SERVER_IP --load --random
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -t NUMBER_THREADS   number of threads
+  -r NUMBER_REQUESTS  number of requests for threads
+  -a APP_HOST         application virtualhost
+  -i SERVER_IP        server ip
+  --load              action to test load
+  --random            action to generate access in random path
+  ```
+
+#### Example to generate random access
+
+```python scripts/load_test.py -a helloproject.com -i 10.0.50.10 --random```
+
+#### Example to load test
+
+```python scripts/load_test.py -a helloproject.com -i 10.0.50.10 -t 50 -r 500 --load```
+

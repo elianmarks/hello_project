@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
       end
       config.vm.provision "ansible" do |ansible|
         ansible.verbose = "vv"
-        ansible.playbook = "../playbooks/node_deploy.yaml"
+        ansible.playbook = "../playbooks/nodevm_deploy.yaml"
         ansible.extra_vars = {
           server_type: "node"
         }

@@ -37,10 +37,23 @@
         name: "{{ node_repo_rpm }}"
         state: present
 
-    - name: install nodejs
+    - name: install packages
       package:
-        name: "nodejs"
+        name: "{{ item }}"
         state: present
+      with_items:
+        - "nodejs"
+        - "ntp"
+    
+    - name: set timezone
+      timezone:
+        name: "America/Sao_Paulo"
+    
+    - name: start ntp daemon
+      service:
+        name: "{{ ntp_daemon }}"
+        state: started
+        enabled: true
     
     - name: create node_app directory
       file:
@@ -58,6 +71,19 @@
       with_items:
         - "package.json"
         - "app.js"
+    
+    - name: copy script log_parse.sh
+      copy:
+        src: "files/log_parse.sh"
+        dest: "/usr/bin/log_parse.sh"
+        mode: 0755
+    
+    - name: create cron to execute log_parse.sh
+      cron:
+        name: "execute log_parse.sh"
+        minute: "0"
+        hour: "22"
+        job: "/usr/bin/log_parse.sh"
     
     - name: Install npm packages 
       npm:
