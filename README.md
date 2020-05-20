@@ -1,4 +1,4 @@
-# Hello Project :D
+# Hello Project
 
 ---
 
